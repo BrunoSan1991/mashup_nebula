@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@nebula.js/sn-bar-chart": "^1.x",
+    "@nebula.js/sn-pie-chart": "^1.27.11",
     "@nebula.js/stardust": "5.7.1",
     "@qlik/sdk": "^0.12.0",
     "enigma.js": "^2.6.3"
