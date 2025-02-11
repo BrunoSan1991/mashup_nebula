@@ -4,23 +4,24 @@ import { Auth, AuthType } from '@qlik/sdk';
 
 export default class Authenticator {
   /**
-   *
-   * @param {String} appId  - application id from sense client
-   * @param {Strign} url    - tenant url
+   * Construtor da classe Authenticator.
+   * @param {Object} config - Configurações para autenticação.
+   * @param {String} config.appId - ID da aplicação no Qlik Sense.
+   * @param {String} config.url - URL do tenant do Qlik Sense.
    */
   constructor({ appId, url }) {
     this.authInstance = null;
     this.appId = appId;
-    this.host = url.replace(/^https?:\/\//, '').replace(/\/?/, ''); //Regex para alguma coisa
+    // Remove o protocolo e barras extras da URL para garantir que o host esteja limpo.
+    this.host = url.replace(/^https?:\/\//, '').replace(/\/?/, '');
   }
 
   /**
-   * gets you the promise of enigma instance for your app
-   * based on webIntegrationId
-   * @param {Strign} webIntegrationId - your web Integration Id from managment console
-   * @returns {Promise<IEnigmaClass>} enigma app promise
+   * Autentica usando o Web Integration ID e retorna uma instância do aplicativo Enigma.
+   * @param {String} webIntegrationId - Web Integration ID do console de gerenciamento.
+   * @returns {Promise<IEnigmaClass>} - Promessa de uma instância do aplicativo Enigma.
    */
-  async AuthenticateWithWebIntegrationId({ webIntegrationId }) {
+  async authenticateWithWebIntegrationId({ webIntegrationId }) {
     this.authInstance = new Auth({
       authType: AuthType.WebIntegration,
       autoRedirect: true,
@@ -29,24 +30,22 @@ export default class Authenticator {
     });
 
     if (!this.authInstance.isAuthenticated()) {
-      this.authInstance.authenticate();
-    } else return this.getEnigmaApp();
-
-    return null;
+      await this.authInstance.authenticate();
+    }
+    return this.getEnigmaApp();
   }
 
   /**
-   * gets you the promise of enigma instance for your app
-   * based on clientId
-   * @param {Strign} clientId     - your client Id from managment console
-   * @param {Strign} redirectUri  - the redirect url while bringing you the code + state, default is `window.location.origin`
-   * @returns {Promise<IEnigmaClass>} enigma app promise
+   * Autentica usando OAuth2 e retorna uma instância do aplicativo Enigma.
+   * @param {String} clientId - Client ID do console de gerenciamento.
+   * @param {String} redirectUri - URI de redirecionamento após a autenticação.
+   * @returns {Promise<IEnigmaClass>} - Promessa de uma instância do aplicativo Enigma.
    */
-  async AuthenticateWithOAuth({ clientId, redirectUri }) {
+  async authenticateWithOAuth({ clientId, redirectUri = window.location.origin }) {
     this.authInstance = new Auth({
       authType: AuthType.OAuth2,
       host: this.host,
-      redirectUri: redirectUri || window.location.origin,
+      redirectUri,
       clientId,
     });
 
@@ -59,24 +58,22 @@ export default class Authenticator {
         url.searchParams.delete('state');
         window.history.replaceState(null, null, url);
       } catch (error) {
-        console.error({ error });
+        console.error('Erro durante a autorização:', error);
+        throw error;
       }
-
       return this.getEnigmaApp();
     }
 
     if (!(await this.authInstance.isAuthorized())) {
       const { url } = await this.authInstance.generateAuthorizationUrl();
-      const protocol = url.includes('https://') ? 'https' : 'http';
-      window.location = `${protocol}://${url}`;
+      window.location.href = url; // Redireciona para a URL de autorização.
     }
-
     return null;
   }
 
   /**
-   * returns a promise of enigma instance
-   * @returns {Promise<IEnigmaClass>} enigma app instance promise
+   * Gera e retorna uma instância do aplicativo Enigma.
+   * @returns {Promise<IEnigmaClass>} - Promessa de uma instância do aplicativo Enigma.
    */
   async getEnigmaApp() {
     const url = await this.authInstance.generateWebsocketUrl(this.appId);
