@@ -11,7 +11,7 @@ export default class Authenticator {
   constructor({ appId, url }) {
     this.authInstance = null;
     this.appId = appId;
-    this.host = url.replace(/^https?:\/\//, '').replace(/\/?/, '');
+    this.host = url.replace(/^https?:\/\//, '').replace(/\/?/, ''); //Regex para alguma coisa
   }
 
   /**
