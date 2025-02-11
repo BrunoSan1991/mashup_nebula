@@ -29,7 +29,7 @@ async function run() {
       console.error('Elemento .object não encontrado.');
     }
   } catch (error) {
-    console.error('Erro ao conectar ou incorporar o aplicativo:', error);
+    console.error('Erro ao conectar ou incorporar o aplicativo:', error);//vai corintians
   }
 }
 
