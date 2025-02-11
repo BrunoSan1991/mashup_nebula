@@ -26,7 +26,7 @@ async function run() {
         id: 'ZxDKp',
       });
     } else {
-      console.error('Elemento .object não encontrado.');
+      console.error('Elemento .object não encontrado.');//vai corintians
     }
   } catch (error) {
     console.error('Erro ao conectar ou incorporar o aplicativo:', error);//vai corintians
